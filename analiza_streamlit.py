@@ -10,7 +10,6 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 from impyute.imputation.cs import mice
 from scipy.stats import zscore
-from geopy.geocoders import Nominatim
 import pandas as pd
   
 st.title("Student Depression Data Analysis")
@@ -28,6 +27,9 @@ df.drop(columns=['Work Pressure'])
 df['Gender'] = df['Gender'].map({'Male': 0, "Female": 1})
 df['Suicidal_Thoughts'] = df['Have you ever had suicidal thoughts ?'].map({'No': 0, 'Yes': 1})
 df.drop(columns=['Have you ever had suicidal thoughts ?'], inplace=True)
+
+# Drop the unnecessary columns
+df.drop(columns=['Profession', 'Work Pressure', 'Job Satisfaction'], inplace=True)
 
 # Ordinal Encoding
 diet_map = {'Unhealthy': 0, 'Moderate': 1, 'Healthy': 2}
@@ -233,48 +235,6 @@ coef_df = pd.DataFrame({
 
 st.dataframe(coef_df)
 
-from geopy.geocoders import Nominatim
-import pandas as pd
-import geopandas as gpd
-from shapely.geometry import Point
-import time
-
-unique_cities = df['City'].unique()
-geolocator = Nominatim(user_agent="geoapiExercises")
-
-city_coords = {}
-
-for city in unique_cities:
-    try:
-        location = geolocator.geocode(city)
-        if location:
-            city_coords[city] = (location.latitude, location.longitude)
-        else:
-            city_coords[city] = (None, None)
-        time.sleep(1)  # ca să nu fie blocat de server
-    except:
-        city_coords[city] = (None, None)
-
-# Add the coordinates to dataFrame
-df['Latitude'] = df['City'].map(lambda x: city_coords[x][0])
-df['Longitude'] = df['City'].map(lambda x: city_coords[x][1])
-
-geometry = [Point(xy) for xy in zip(df['Longitude'], df['Latitude'])]
-gdf = gpd.GeoDataFrame(df, geometry=geometry)
-
-import matplotlib.pyplot as plt
-
-fig, ax = plt.subplots(figsize=(10, 10))
-world = gpd.read_file(gpd.datasets.get_path('naturalearth_lowres'))
-world.plot(ax=ax, color='lightgray')
-
-# Colorezi în funcție de depresie (1 sau 0)
-gdf[gdf['Depression'] == 1].plot(ax=ax, color='red', markersize=50, label="Depresie")
-gdf[gdf['Depression'] == 0].plot(ax=ax, color='green', markersize=50, label="Fără depresie")
-
-plt.legend()
-plt.title("Depression distribution based by location")
-st.pyplot(fig)
 
 
 
