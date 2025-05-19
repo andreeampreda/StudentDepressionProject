@@ -234,35 +234,3 @@ coef_df = pd.DataFrame({
 }).sort_values(by="Coefficient", key=lambda x: abs(x), ascending=False)
 
 st.dataframe(coef_df)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
